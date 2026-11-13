@@ -36,7 +36,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
 const canvas=document.getElementById('track');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x08091b);scene.fog=new THREE.FogExp2(0x11102b,.012);
 const camera=new THREE.PerspectiveCamera(43,16/9,.1,300);camera.position.set(0,27,33);camera.lookAt(0,0,0);
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(canvas.clientWidth||900,(canvas.clientWidth||900)*9/16,false);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.35;
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(canvas.clientWidth||900,(canvas.clientWidth||900)*9/16,false);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.35;
 scene.add(new THREE.HemisphereLight(0x9adfff,0x22102f,2.1));
 const key=new THREE.DirectionalLight(0xffd4ec,3.1);key.position.set(-10,22,12);key.castShadow=true;scene.add(key);
 const pinkLight=new THREE.PointLight(0xff329c,95,48);pinkLight.position.set(-13,8,-5);scene.add(pinkLight);
@@ -108,7 +108,7 @@ function makeCar(color){
  part(new THREE.CylinderGeometry(.07,.09,.24,12),alloy,0,.42,1.64,Math.PI/2);
  part(new THREE.BoxGeometry(.24,.045,.1),new THREE.MeshBasicMaterial({color:0xff263e}),0,.3,1.84);
  const under=part(new THREE.BoxGeometry(1.15,.045,2.8),glow,0,.19,0);
- root.userData={wheels,glow:under};scene.add(root);return root
+ const flame=part(new THREE.ConeGeometry(.16,.8,12),new THREE.MeshBasicMaterial({color:0xff8a32,transparent:true,opacity:.95}),0,.43,2.02,Math.PI/2);flame.visible=false;const innerFlame=part(new THREE.ConeGeometry(.09,.55,12),new THREE.MeshBasicMaterial({color:0x72faff,transparent:true,opacity:.95}),0,.43,2.12,Math.PI/2);innerFlame.visible=false;root.userData={wheels,glow:under,flames:[flame,innerFlame]};scene.add(root);return root
 }
 const racers=[{name:'@laura_8086',color:0x43f5ed,p:0,s:0,featured:true,mesh:makeCar(0x43f5ed)},{name:'@speedking',color:0xff4fa3,p:0,s:0,mesh:makeCar(0xff4fa3)},{name:'@racer_x',color:0xffe66d,p:0,s:0,mesh:makeCar(0xffe66d)}];
 function building(x,z,h,color){const g=new THREE.Group(),mat=new THREE.MeshStandardMaterial({color,roughness:.8});const b=new THREE.Mesh(new THREE.BoxGeometry(2.3,h,2.4),mat);b.position.y=h/2-.4;b.castShadow=true;g.add(b);for(let y=.5;y<h-1;y+=1.25){for(let xx of [-.65,0,.65]){const win=new THREE.Mesh(new THREE.PlaneGeometry(.28,.48),new THREE.MeshBasicMaterial({color:Math.random()>.5?0xff62ae:0x48eafa}));win.position.set(xx,y,-1.21);g.add(win)}}g.position.set(x,0,z);scene.add(g)}
@@ -133,14 +133,14 @@ for(let i=0;i<7;i++){const garage=new THREE.Mesh(new THREE.BoxGeometry(3.5,2.5,2
 const stars=new THREE.Points(new THREE.BufferGeometry(),new THREE.PointsMaterial({color:0x9fefff,size:.16}));const starPos=[];for(let i=0;i<260;i++)starPos.push((Math.random()-.5)*100,8+Math.random()*28,(Math.random()-.5)*80);stars.geometry.setAttribute('position',new THREE.Float32BufferAttribute(starPos,3));scene.add(stars);
 let likes=0,boost=0,finished=false,tick=0;const $=id=>document.getElementById(id);
 function addFeed(msg){const el=document.createElement('span');el.textContent=msg;$('feed').prepend(el);while($('feed').children.length>6)$('feed').lastChild.remove()}
-function placeCar(d,index){const t=(d.p/100)%1,p=trackCurve.getPointAt(t),tan=trackCurve.getTangentAt(t);d.mesh.position.set(p.x,.22+Math.sin(tick*.12+index)*.025,p.z);d.mesh.rotation.y=Math.atan2(-tan.x,-tan.z);d.mesh.userData.wheels.forEach(w=>w.rotation.x+=.18+ d.s*.001);d.mesh.userData.glow.material.opacity=d.featured&&boost>1?.95:.42}
+function placeCar(d,index){const t=(d.p/100)%1,p=trackCurve.getPointAt(t),tan=trackCurve.getTangentAt(t);d.mesh.position.set(p.x,.22+Math.sin(tick*.12+index)*.025,p.z);d.mesh.rotation.y=Math.atan2(-tan.x,-tan.z);d.mesh.userData.wheels.forEach(w=>w.rotation.x+=.18+ d.s*.001);d.mesh.userData.glow.material.opacity=d.featured&&boost>1?.95:.42;d.mesh.userData.flames.forEach((f,i)=>{f.visible=d.featured&&boost>1;f.scale.setScalar((.7+Math.random()*.65)*(i?.8:1))})}
 function resize(){const w=canvas.clientWidth||900,h=Math.max(180,w*9/16);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(canvas.parentElement);resize();
 function animate(){requestAnimationFrame(animate);tick++;if(!finished){const f=racers[0];f.s=Math.min(360,105+boost*3);f.p=Math.min(100,f.p+.025+boost*.0009);boost*=.94;if(f.p>=100){finished=true;addFeed('🏆 @laura_8086 wins the Miami Night GP!')}}racers[1].p=Math.min(99,racers[1].p+.012);racers[2].p=Math.min(99,racers[2].p+.009);
 racers.forEach(placeCar);const f=racers[0];$('progress').textContent=Math.floor(f.p)+'%';$('distance').textContent=(2.4*(1-f.p/100)).toFixed(2)+' km';$('speed').textContent=Math.round(f.s)+' km/h';
 $('drivers').innerHTML=racers.slice().sort((a,b)=>b.p-a.p).map((d,i)=>'<div class="driver '+(d.featured?'active':'')+'"><b>'+['🥇','🥈','🥉'][i]+' '+d.name+'</b><small>'+Math.floor(d.p)+'% complete</small><div class="bar"><i style="width:'+d.p+'%;background:#'+d.color.toString(16).padStart(6,'0')+'"></i></div></div>').join('');
 camera.position.x=Math.sin(tick*.0015)*.7;camera.lookAt(0,0,0);renderer.render(scene,camera)}
-$('like').addEventListener('click',()=>{if(finished)return;likes++;boost+=.7;addFeed('♥ Viewer liked the race · '+likes+' likes')});
+function sendLike(){if(finished)return;likes++;boost+=.7;addFeed('♥ Viewer liked the race · '+likes+' likes')} $('like').addEventListener('click',sendLike);canvas.addEventListener('pointerdown',sendLike);
 document.querySelectorAll('[data-boost]').forEach(b=>b.addEventListener('click',()=>{if(finished)return;boost+=Number(b.dataset.boost);addFeed(b.textContent+' sent · NITRO ACTIVATED!')}));
 animate();
 </script></body></html>
