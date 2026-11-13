@@ -31,36 +31,50 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;ba
 </div><p class="note">Demo mode: buttons simulate LIVE likes and gifts. Real TikTok event connection is not enabled.</p></section>
 <section class="panel"><h2 class="section-title"><em>✦</em> LIVE ACTIVITY</h2><div class="feed" id="feed"><span>🏁 Neon Coast Circuit is ready</span><span>🏎️ @laura_8086 is on the grid</span></div></section>
 </main>
-<script>
-const canvas=document.getElementById('track'),ctx=canvas.getContext('2d'),W=1200,H=675;
-const drivers=[{name:'@laura_8086',color:'#43f5ed',p:0,s:0,featured:true},{name:'@speedking',color:'#ff4fa3',p:0,s:0},{name:'@racer_x',color:'#ffe66d',p:0,s:0}];
-let likes=0,boost=0,finished=false,tick=0,particles=[];
-const $=id=>document.getElementById(id);
-function glow(color,blur){ctx.shadowColor=color;ctx.shadowBlur=blur}
-function palm(x,y,s){ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.strokeStyle='#10192d';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(12,-70,0,-145);ctx.stroke();for(let i=0;i<7;i++){let a=(-2.8+i*.47);ctx.strokeStyle=i%2?'#122b3c':'#17283d';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(0,-140);ctx.quadraticCurveTo(Math.sin(a)*55,-155,Math.sin(a)*110,-110+Math.cos(a)*35);ctx.stroke()}ctx.restore()}
-function skyline(){for(let i=0;i<22;i++){let x=i*58-10,h=70+(i*37%150);ctx.fillStyle=i%2?'#10172e':'#15152e';ctx.fillRect(x,220-h,43,h);for(let yy=235-h;yy<215;yy+=18)for(let xx=x+8;xx<x+38;xx+=13){ctx.fillStyle=(i+yy+xx)%3?'#ff68a6':'#42e9e7';ctx.globalAlpha=.3+((i+xx)%4)*.12;ctx.fillRect(xx,yy,4,6)}ctx.globalAlpha=1}}
-function drawCar(x,y,color,scale=1){ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);glow(color,16);ctx.fillStyle='#080914';ctx.fillRect(-34,-17,17,12);ctx.fillRect(20,-17,17,12);ctx.fillRect(-34,5,17,12);ctx.fillRect(20,5,17,12);ctx.shadowBlur=8;ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(-44,-8);ctx.lineTo(-19,-8);ctx.lineTo(-11,-16);ctx.lineTo(19,-12);ctx.lineTo(38,-6);ctx.lineTo(48,0);ctx.lineTo(38,6);ctx.lineTo(19,12);ctx.lineTo(-11,16);ctx.lineTo(-19,8);ctx.lineTo(-44,8);ctx.closePath();ctx.fill();ctx.fillStyle='#d9ffff';ctx.fillRect(-7,-6,19,12);ctx.fillStyle='#fff';ctx.fillRect(37,-3,9,6);ctx.restore()}
-function drawTrack(){ctx.clearRect(0,0,W,H);let sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#11152e');sky.addColorStop(.48,'#24143b');sky.addColorStop(1,'#071c2b');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
-let moon=ctx.createRadialGradient(930,90,5,930,90,120);moon.addColorStop(0,'#ffb8d8');moon.addColorStop(1,'#ff4fa300');ctx.fillStyle=moon;ctx.fillRect(800,0,260,230);ctx.fillStyle='#ffd9e8';ctx.beginPath();ctx.arc(930,90,27,0,Math.PI*2);ctx.fill();
-skyline();palm(75,350,.9);palm(1120,345,.85);
-ctx.fillStyle='#123b4a';ctx.fillRect(0,350,W,325);for(let i=0;i<20;i++){ctx.strokeStyle='#32dfe0';ctx.globalAlpha=.1;ctx.beginPath();ctx.moveTo(0,390+i*16);ctx.lineTo(W,390+i*16);ctx.stroke()}ctx.globalAlpha=1;
-ctx.save();ctx.translate(600,390);ctx.rotate(-.05);
-ctx.strokeStyle='#ff4fa3';ctx.lineWidth=122;glow('#ff4fa3',25);ctx.beginPath();ctx.ellipse(0,0,435,205,0,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;
-ctx.strokeStyle='#e8e7ff';ctx.lineWidth=110;ctx.beginPath();ctx.ellipse(0,0,435,205,0,0,Math.PI*2);ctx.stroke();
-ctx.strokeStyle='#242443';ctx.lineWidth=98;ctx.beginPath();ctx.ellipse(0,0,435,205,0,0,Math.PI*2);ctx.stroke();
-ctx.setLineDash([24,20]);ctx.strokeStyle='#43f5ed';ctx.lineWidth=3;glow('#43f5ed',9);ctx.beginPath();ctx.ellipse(0,0,435,205,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.shadowBlur=0;
-ctx.restore();
-ctx.fillStyle='#101c36';ctx.beginPath();ctx.ellipse(600,390,340,110,-.05,0,Math.PI*2);ctx.fill();
-ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='1000 35px Arial';glow('#ff4fa3',18);ctx.fillText('MIAMI NIGHT GP',600,375);ctx.shadowBlur=0;ctx.fillStyle='#a8e9ef';ctx.font='bold 15px Arial';ctx.fillText('NEON COAST CIRCUIT  ·  2.4 KM',600,402);
-drivers.forEach((d,i)=>{let a=d.p/100*Math.PI*2-Math.PI/2-.05;let x=600+435*Math.cos(a),y=390+205*Math.sin(a);drawCar(x,y,d.color,d.featured?1.18:1)});
-for(let i=0;i<22;i++){let x=(i*83+tick*1.3)%W,y=(i*47+tick*.45)%H;ctx.fillStyle=i%2?'#43f5ed':'#ff8dc2';ctx.globalAlpha=.25+Math.sin(tick*.04+i)*.2;ctx.fillRect(x,y,2,2)}ctx.globalAlpha=1;
-}
-function update(){tick++;let f=drivers[0];if(!finished){f.s=Math.min(360,105+boost*3);f.p=Math.min(100,f.p+.025+boost*.0009);boost*=.94;if(f.p>=100){finished=true;addFeed('🏆 @laura_8086 wins the Miami Night GP!')}}drivers[1].p=Math.min(99,drivers[1].p+.012);drivers[2].p=Math.min(99,drivers[2].p+.009);
-$('progress').textContent=Math.floor(f.p)+'%';$('distance').textContent=(2.4*(1-f.p/100)).toFixed(2)+' km';$('speed').textContent=Math.round(f.s)+' km/h';
-$('drivers').innerHTML=drivers.slice().sort((a,b)=>b.p-a.p).map((d,i)=>'<div class="driver '+(d.featured?'active':'')+'"><b>'+['🥇','🥈','🥉'][i]+' '+d.name+'</b><small>'+Math.floor(d.p)+'% complete</small><div class="bar"><i style="width:'+d.p+'%;background:'+d.color+';color:'+d.color+'"></i></div></div>').join('');
-drawTrack();requestAnimationFrame(update)}
-function addFeed(msg){let el=document.createElement('span');el.textContent=msg;$('feed').prepend(el);while($('feed').children.length>6)$('feed').lastChild.remove()}
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const canvas=document.getElementById('track');
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x08091b);scene.fog=new THREE.FogExp2(0x11102b,.012);
+const camera=new THREE.PerspectiveCamera(43,16/9,.1,300);camera.position.set(0,27,33);camera.lookAt(0,0,0);
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(canvas.clientWidth||900,(canvas.clientWidth||900)*9/16,false);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.35;
+scene.add(new THREE.HemisphereLight(0x9adfff,0x22102f,2.1));
+const key=new THREE.DirectionalLight(0xffd4ec,3.1);key.position.set(-10,22,12);key.castShadow=true;scene.add(key);
+const pinkLight=new THREE.PointLight(0xff329c,95,48);pinkLight.position.set(-13,8,-5);scene.add(pinkLight);
+const cyanLight=new THREE.PointLight(0x20eaff,90,48);cyanLight.position.set(14,7,8);scene.add(cyanLight);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(180,120),new THREE.MeshStandardMaterial({color:0x092b38,roughness:.88}));ground.rotation.x=-Math.PI/2;ground.position.y=-.42;ground.receiveShadow=true;scene.add(ground);
+const trackCurve=new THREE.CatmullRomCurve3(Array.from({length:100},(_,i)=>{const a=i/100*Math.PI*2;return new THREE.Vector3(Math.cos(a)*16,0,Math.sin(a)*8.5)}),true,'catmullrom',.5);
+function ribbon(curve,width,y,material){const pts=curve.getPoints(240),verts=[],idx=[];for(let i=0;i<pts.length;i++){const p=pts[i],t=curve.getTangentAt(i/(pts.length-1)),side=new THREE.Vector3(-t.z,0,t.x).normalize();verts.push(p.x+side.x*width/2,y,p.z+side.z*width/2,p.x-side.x*width/2,y,p.z-side.z*width/2);if(i<pts.length-1){const n=i*2;idx.push(n,n+1,n+2,n+1,n+3,n+2)}}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setIndex(idx);g.computeVertexNormals();const m=new THREE.Mesh(g,material);m.receiveShadow=true;scene.add(m);return m}
+ribbon(trackCurve,10,.02,new THREE.MeshStandardMaterial({color:0x222638,roughness:.78,metalness:.18,side:THREE.DoubleSide}));
+function rail(offset,color){const pts=trackCurve.getPoints(260).map((p,i)=>{const t=trackCurve.getTangentAt(i/260),s=new THREE.Vector3(-t.z,0,t.x).normalize();return p.addScaledVector(s,offset).setY(.22)});const curve=new THREE.CatmullRomCurve3(pts,true);const mesh=new THREE.Mesh(new THREE.TubeGeometry(curve,260,.09,8,true),new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:2.6,metalness:.35}));scene.add(mesh)}
+rail(5.12,0xff329d);rail(-5.12,0x28eaff);
+const dashMat=new THREE.MeshStandardMaterial({color:0xdffeff,emissive:0x3acbd8,emissiveIntensity:.65});
+for(let i=0;i<64;i++){const a=i/64*Math.PI*2;const m=new THREE.Mesh(new THREE.BoxGeometry(.13,.035,.75),dashMat);m.position.set(Math.cos(a)*16,.09,Math.sin(a)*8.5);m.rotation.y=-a;scene.add(m)}
+const infield=new THREE.Mesh(new THREE.CircleGeometry(6.4,64),new THREE.MeshStandardMaterial({color:0x10233a,roughness:.9}));infield.rotation.x=-Math.PI/2;infield.position.y=-.05;scene.add(infield);
+function makeCar(color){const root=new THREE.Group(),paint=new THREE.MeshStandardMaterial({color,metalness:.55,roughness:.25,emissive:color,emissiveIntensity:.18}),black=new THREE.MeshStandardMaterial({color:0x080a13,roughness:.55}),glass=new THREE.MeshStandardMaterial({color:0x9cecff,metalness:.7,roughness:.12,transparent:true,opacity:.82});
+function box(w,h,d,mat,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.castShadow=true;root.add(m);return m}
+box(1.15,.28,2.8,paint,0,.42,0);box(1.5,.12,.45,paint,0,.4,-1.48);box(1.65,.12,.42,paint,0,.4,1.55);box(.55,.35,.8,glass,0,.67,.05);box(.08,.25,1.25,black,0,.62,-.62);
+const wheels=[];for(const x of [-.78,.78])for(const z of [-.93,.98]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.32,.32,.22,16),black);w.rotation.z=Math.PI/2;w.position.set(x,.32,z);w.castShadow=true;root.add(w);wheels.push(w)}
+const nose=box(.28,.16,1.1,paint,0,.32,-1.8);nose.rotation.x=-.04;
+const glowMesh=new THREE.Mesh(new THREE.BoxGeometry(.55,.06,2.8),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.5}));glowMesh.position.y=.22;root.add(glowMesh);
+root.userData={wheels,glow:glowMesh};scene.add(root);return root}
+const racers=[{name:'@laura_8086',color:0x43f5ed,p:0,s:0,featured:true,mesh:makeCar(0x43f5ed)},{name:'@speedking',color:0xff4fa3,p:0,s:0,mesh:makeCar(0xff4fa3)},{name:'@racer_x',color:0xffe66d,p:0,s:0,mesh:makeCar(0xffe66d)}];
+function building(x,z,h,color){const g=new THREE.Group(),mat=new THREE.MeshStandardMaterial({color,roughness:.8});const b=new THREE.Mesh(new THREE.BoxGeometry(2.3,h,2.4),mat);b.position.y=h/2-.4;b.castShadow=true;g.add(b);for(let y=.5;y<h-1;y+=1.25){for(let xx of [-.65,0,.65]){const win=new THREE.Mesh(new THREE.PlaneGeometry(.28,.48),new THREE.MeshBasicMaterial({color:Math.random()>.5?0xff62ae:0x48eafa}));win.position.set(xx,y,-1.21);g.add(win)}}g.position.set(x,0,z);scene.add(g)}
+for(let i=0;i<30;i++){const a=i/30*Math.PI*2,r=27+(i%3)*3;building(Math.cos(a)*r,Math.sin(a)*r,5+(i*13%13),i%2?0x171a38:0x20203e)}
+function palm(x,z){const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.16,.28,4,7),new THREE.MeshStandardMaterial({color:0x5c3b4a}));trunk.position.set(x,1.6,z);trunk.rotation.z=.12;scene.add(trunk);for(let i=0;i<7;i++){const leaf=new THREE.Mesh(new THREE.ConeGeometry(.3,3.5,5),new THREE.MeshStandardMaterial({color:0x137c75,emissive:0x063d4a}));leaf.position.set(x+Math.cos(i/7*Math.PI*2)*1.1,3.4,z+Math.sin(i/7*Math.PI*2)*1.1);leaf.rotation.z=Math.cos(i/7*Math.PI*2)*.8;leaf.rotation.x=Math.sin(i/7*Math.PI*2)*.8;scene.add(leaf)}}
+palm(-24,-5);palm(24,5);palm(-22,14);palm(23,-14);
+const signMat=new THREE.MeshStandardMaterial({color:0xff3d9b,emissive:0xff168a,emissiveIntensity:2});
+const sign=new THREE.Mesh(new THREE.BoxGeometry(7,.55,.3),signMat);sign.position.set(0,5,-13);scene.add(sign);
+const stars=new THREE.Points(new THREE.BufferGeometry(),new THREE.PointsMaterial({color:0x9fefff,size:.16}));const starPos=[];for(let i=0;i<260;i++)starPos.push((Math.random()-.5)*100,8+Math.random()*28,(Math.random()-.5)*80);stars.geometry.setAttribute('position',new THREE.Float32BufferAttribute(starPos,3));scene.add(stars);
+let likes=0,boost=0,finished=false,tick=0;const $=id=>document.getElementById(id);
+function addFeed(msg){const el=document.createElement('span');el.textContent=msg;$('feed').prepend(el);while($('feed').children.length>6)$('feed').lastChild.remove()}
+function placeCar(d,index){const t=(d.p/100)%1,p=trackCurve.getPointAt(t),tan=trackCurve.getTangentAt(t);d.mesh.position.set(p.x,.22+Math.sin(tick*.12+index)*.025,p.z);d.mesh.rotation.y=Math.atan2(-tan.x,-tan.z);d.mesh.userData.wheels.forEach(w=>w.rotation.x+=.18+ d.s*.001);d.mesh.userData.glow.material.opacity=d.featured&&boost>1?.95:.42}
+function resize(){const w=canvas.clientWidth||900,h=Math.max(180,w*9/16);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+new ResizeObserver(resize).observe(canvas.parentElement);resize();
+function animate(){requestAnimationFrame(animate);tick++;if(!finished){const f=racers[0];f.s=Math.min(360,105+boost*3);f.p=Math.min(100,f.p+.025+boost*.0009);boost*=.94;if(f.p>=100){finished=true;addFeed('🏆 @laura_8086 wins the Miami Night GP!')}}racers[1].p=Math.min(99,racers[1].p+.012);racers[2].p=Math.min(99,racers[2].p+.009);
+racers.forEach(placeCar);const f=racers[0];$('progress').textContent=Math.floor(f.p)+'%';$('distance').textContent=(2.4*(1-f.p/100)).toFixed(2)+' km';$('speed').textContent=Math.round(f.s)+' km/h';
+$('drivers').innerHTML=racers.slice().sort((a,b)=>b.p-a.p).map((d,i)=>'<div class="driver '+(d.featured?'active':'')+'"><b>'+['🥇','🥈','🥉'][i]+' '+d.name+'</b><small>'+Math.floor(d.p)+'% complete</small><div class="bar"><i style="width:'+d.p+'%;background:#'+d.color.toString(16).padStart(6,'0')+'"></i></div></div>').join('');
+camera.position.x=Math.sin(tick*.0015)*.7;camera.lookAt(0,0,0);renderer.render(scene,camera)}
 $('like').addEventListener('click',()=>{if(finished)return;likes++;boost+=.7;addFeed('♥ Viewer liked the race · '+likes+' likes')});
 document.querySelectorAll('[data-boost]').forEach(b=>b.addEventListener('click',()=>{if(finished)return;boost+=Number(b.dataset.boost);addFeed(b.textContent+' sent · NITRO ACTIVATED!')}));
-drawTrack();requestAnimationFrame(update);
+animate();
 </script></body></html>
