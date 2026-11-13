@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>TikTok Race</title>
+<style>
+:root{--cyan:#19e6dc;--pink:#ff3d83;--gold:#ffd166;--bg:#080d18}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#1b2941,#080d18 65%);color:#fff;font-family:Arial,sans-serif;min-height:100vh;overflow-x:hidden}
+.app{max-width:1000px;margin:auto;padding:14px}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.brand{font-size:clamp(22px,4vw,34px);font-weight:900;letter-spacing:1px}.brand span{color:var(--cyan)}.live{background:#e93063;border-radius:30px;padding:7px 12px;font-size:12px;font-weight:bold;letter-spacing:1px}
+.sub{color:#9eacc4;font-size:13px;margin:4px 0 14px}.panel{background:#111b2c;border:1px solid #26364e;border-radius:16px;padding:12px;margin-bottom:12px;box-shadow:0 12px 35px #0005}
+.track-wrap{position:relative;overflow:hidden;border-radius:13px;background:#263d32}.track{display:block;width:100%;height:auto;aspect-ratio:16/9}
+.hud{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.stat{background:#0a1220;border-radius:10px;padding:9px;text-align:center}.stat small{display:block;color:#92a2bb;font-size:10px;text-transform:uppercase;letter-spacing:1px}.stat strong{font-size:clamp(17px,3vw,24px)}
+.section-title{font-size:14px;font-weight:800;letter-spacing:1px;margin:0 0 10px}.drivers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.driver{background:#0b1423;border:1px solid #26364e;border-radius:11px;padding:9px;min-width:0}.driver.active{border-color:var(--cyan);box-shadow:0 0 0 1px #19e6dc55}.driver b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis}.driver small{color:#9eacc4;font-size:11px}.bar{height:5px;background:#27354b;border-radius:9px;margin-top:7px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),#7dffbd);width:20%}
+.controls{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:8px}.btn{border:0;border-radius:11px;padding:13px 8px;font-weight:900;color:#07111c;background:var(--cyan);font-size:14px;cursor:pointer;touch-action:manipulation}.btn:active{transform:scale(.97)}.btn.gift{background:#27364c;color:#fff;border:1px solid #40516b}.btn.like{background:linear-gradient(120deg,#ff3d83,#ff8eae);color:white}.btn:disabled{opacity:.4}
+.note{color:#8fa0ba;font-size:11px;line-height:1.5;margin:10px 2px 2px}.feed{display:flex;gap:7px;flex-wrap:wrap}.feed span{background:#0a1423;border-radius:30px;padding:7px 10px;font-size:11px;color:#cbd7e9}
+@media(max-width:560px){.app{padding:10px}.controls{grid-template-columns:1fr 1fr}.drivers{grid-template-columns:1fr 1fr 1fr}.panel{padding:10px}.btn{padding:12px 5px;font-size:12px}}
+</style>
+</head>
+<body><main class="app">
+<header class="top"><div class="brand">TIKTOK <span>RACE</span></div><div class="live">● LIVE DEMO</div></header>
+<div class="sub">Tap likes and gifts to power the featured driver. Let the race begin.</div>
+<section class="panel">
+<div class="track-wrap"><canvas id="track" class="track" width="960" height="540"></canvas></div>
+<div class="hud"><div class="stat"><small>Lap progress</small><strong id="progress">0%</strong></div><div class="stat"><small>Distance left</small><strong id="distance">2.4 km</strong></div><div class="stat"><small>Featured speed</small><strong id="speed">0 km/h</strong></div></div>
+</section>
+<section class="panel"><h2 class="section-title">LIVE LEADERBOARD</h2><div class="drivers" id="drivers"></div></section>
+<section class="panel"><h2 class="section-title">SEND SUPPORT</h2><div class="controls">
+<button class="btn like" id="like">♥ LIKE +1</button><button class="btn gift" data-boost="3" data-name="Rose">🌹 Rose +3</button><button class="btn gift" data-boost="12" data-name="Galaxy">🌌 Galaxy +12</button><button class="btn gift" data-boost="25" data-name="Lion">🦁 Lion +25</button>
+</div><p class="note">Demo controls only. These buttons simulate TikTok events; they are not connected to a real LIVE event feed.</p></section>
+<section class="panel"><h2 class="section-title">LIVE ACTIVITY</h2><div class="feed" id="feed"><span>🏁 Race simulation ready</span><span>👤 @laura_8086 is racing</span></div></section>
+</main>
+<script>
+const canvas=document.getElementById('track'),ctx=canvas.getContext('2d');
+const drivers=[{name:'@laura_8086',color:'#19e6dc',p:0,s:0,featured:true},{name:'@speedking',color:'#ff3d83',p:0,s:0},{name:'@racer_x',color:'#ffd166',p:0,s:0}];
+let likes=0,boost=0,last=0,finished=false;
+const $=id=>document.getElementById(id);
+function drawCar(x,y,color,scale=1){ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#080b12';ctx.fillRect(-25,-13,12,8);ctx.fillRect(14,-13,12,8);ctx.fillRect(-25,5,12,8);ctx.fillRect(14,5,12,8);ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(-31,-7);ctx.lineTo(-14,-7);ctx.lineTo(-8,-13);ctx.lineTo(15,-10);ctx.lineTo(28,-5);ctx.lineTo(34,0);ctx.lineTo(28,5);ctx.lineTo(15,10);ctx.lineTo(-8,13);ctx.lineTo(-14,7);ctx.lineTo(-31,7);ctx.closePath();ctx.fill();ctx.fillStyle='#d8f4ff';ctx.fillRect(-5,-5,13,10);ctx.fillStyle='#fff';ctx.fillRect(26,-2,7,4);ctx.restore()}
+function renderTrack(){let w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);ctx.fillStyle='#284c38';ctx.fillRect(0,0,w,h);
+for(let i=0;i<24;i++){ctx.fillStyle=i%2?'#315d42':'#2c543b';ctx.fillRect(i*42,0,20,h)}
+ctx.strokeStyle='#dce2e8';ctx.lineWidth=100;ctx.beginPath();ctx.ellipse(480,270,365,175,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#313b49';ctx.lineWidth=88;ctx.beginPath();ctx.ellipse(480,270,365,175,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([22,20]);ctx.strokeStyle='#f7f7e8';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(480,270,365,175,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+ctx.fillStyle='#203b2c';ctx.beginPath();ctx.ellipse(480,270,285,95,0,0,Math.PI*2);ctx.fill();
+drivers.forEach((d,i)=>{let a=d.p/100*Math.PI*2-Math.PI/2;let x=480+365*Math.cos(a),y=270+175*Math.sin(a);drawCar(x,y,d.color,i===0?1.15:1)});
+ctx.fillStyle='#fff';ctx.font='bold 24px Arial';ctx.textAlign='center';ctx.fillText('TIKTOK RACE',480,260);ctx.font='14px Arial';ctx.fillStyle='#b9c8d8';ctx.fillText('2.4 KM CIRCUIT',480,285);
+}
+function update(){let f=drivers[0];if(!finished){f.s=Math.min(340,105+boost*3);f.p=Math.min(100,f.p+0.025+boost*0.0009);boost*=.94;if(f.p>=100){finished=true;addFeed('🏆 @laura_8086 wins the race!')}}drivers[1].p=Math.min(99,drivers[1].p+.012);drivers[2].p=Math.min(99,drivers[2].p+.009);
+$('progress').textContent=Math.floor(f.p)+'%';$('distance').textContent=(2.4*(1-f.p/100)).toFixed(2)+' km';$('speed').textContent=Math.round(f.s)+' km/h';
+$('drivers').innerHTML=drivers.slice().sort((a,b)=>b.p-a.p).map((d,i)=>'<div class="driver '+(d.featured?'active':'')+'"><b>'+['🥇','🥈','🥉'][i]+' '+d.name+'</b><small>'+Math.floor(d.p)+'% complete</small><div class="bar"><i style="width:'+d.p+'%;background:'+d.color+'"></i></div></div>').join('');
+renderTrack();requestAnimationFrame(update)}
+function addFeed(msg){let el=document.createElement('span');el.textContent=msg;$('feed').prepend(el);while($('feed').children.length>6)$('feed').lastChild.remove()}
+$('like').addEventListener('click',()=>{if(finished)return;likes++;boost+=.7;addFeed('♥ Viewer liked the race · '+likes+' likes')});
+document.querySelectorAll('[data-boost]').forEach(b=>b.addEventListener('click',()=>{if(finished)return;let n=+b.dataset.boost;boost+=n;addFeed(b.textContent+' sent · nitro boost activated')}));
+renderTrack();requestAnimationFrame(update);
+</script></body></html>
